@@ -1,0 +1,487 @@
+# ESPHome Configuration
+
+substitutions:
+  # for override
+  esp32_board: adafruit_feather_esp32_v2
+  esphome_name: "intercom"
+  project_version: "0.1.0"
+  esphome_friendly_name: "Gegensprechanlage"
+  time_timezone: "Europe/Vienna"
+  temperature_offset: "-2.0" # Adjust BME280-temperature: e.g. "0.0", "-1.5", "2.1"
+  domain: ".local"
+  # connect_to: optional, custom dns name to reach for updating running esp
+  connect_to: ""
+  # mandatory parameter to be set
+  wifi_ssid: ""
+  wifi_password: ""
+  mqtt_broker: ""
+  mqtt_username: ""
+  mqtt_password: ""
+  ota_password: ""
+  certificate_authority: |
+    -----BEGIN CERTIFICATE-----
+    -----END CERTIFICATE-----
+
+  # Morse Code Timing Configuration
+  # XXX increase dit_duration and related values from 150 to 250, because intercom button is hard to push
+  dit_duration: "250" # Base time unit in ms.
+  dot_dash_threshold: "500" # A press shorter than this is a DIT.
+  letter_timeout: "750" # A pause longer than this separates letters.
+  sequence_timeout: "2075" # Time of inactivity to consider the message complete.
+
+  # Hardware partlist, Module Definition and Wiring
+  hardware:
+    partlist:
+      - name: esp32
+        type: adafruit_feather_esp32_v2
+      - name: rail_3V3
+        type: bus
+      - name: rail_GND
+        type: bus
+      - name: bell_ringing
+        type: optocoupler_pc817
+      - name: switch_door_opener
+        type: relais_1channel
+      - name: switch_silence_buzzer
+        type: relais_1channel
+      - name: bme280_i2c_0x76
+        type: bme280
+      - name: Intercom
+        type: intercom
+      - name: Intercom_Cable
+        type: intercom_cable
+    wiring:
+      esp32.3V3:
+        connect: rail_3V3.BUS
+        color: red
+      esp32.GND:
+        connect: rail_GND.BUS
+        color: black
+
+      switch_door_opener.VCC:
+        connect: rail_3V3.BUS
+        color: red
+      switch_door_opener.GND:
+        connect: rail_GND.BUS
+        color: black
+      switch_door_opener.COM:
+        connect: Intercom.T7
+        color: green
+
+      switch_silence_buzzer.VCC:
+        connect: rail_3V3.BUS
+        color: red
+      switch_door_opener.NO:
+        connect: Intercom.T4_5
+        color: green_white
+      switch_silence_buzzer.GND:
+        connect: rail_GND.BUS
+        color: black
+      switch_silence_buzzer.COM:
+        connect: Intercom_Cable.C4_Pink
+        color: blue
+      switch_silence_buzzer.NC:
+        connect: Intercom.T6
+        color: blue_white
+
+      bell_ringing.VCC:
+        connect: rail_3V3.BUS
+        color: red
+      bell_ringing.GND:
+        connect: rail_GND.BUS
+        color: black
+      bell_ringing.SIG_PLUS:
+        connect: Intercom_Cable.C4_Pink
+        color: orange
+      bell_ringing.SIG_MINUS:
+        connect: Intercom.T4_5
+        color: orange_white
+
+      bme280_i2c_0x76.VIN:
+        connect: rail_3V3.BUS
+        color: red
+      bme280_i2c_0x76.GND:
+        connect: rail_GND.BUS
+        color: black
+
+      Intercom.T1R:
+        connect: Intercom_Cable.C1_Grey
+        color: grey
+      Intercom.T2R:
+        connect: Intercom_Cable.C2_Brown
+        color: brown
+      Intercom.T3R:
+        connect: Intercom_Cable.C3_Green
+        color: green
+        Description: Ground
+      Intercom.T4_5R:
+        connect: Intercom.T3
+        color: grey
+      Intercom.T6R:
+        disconnect: Intercom_Cable.C4_Pink
+        color: pink
+      Intercom.T7R:
+        connect: Intercom_Cable.C5_Yellow
+        color: yellow
+      # Door Light Button, T8 on press connects to T4_5, but no cable is connected to terminal
+    modules:
+      bus:
+        description: Connection Bus
+        pins:
+          - name: BUS
+
+      intercom_cable:
+        description: Cable from House-Intercom
+        pins:
+          - name: C1_Grey
+            description: Audio
+          - name: C2_Brown
+            description: Audio
+          - name: C3_Green
+            description: Ground
+          - name: C4_Pink
+            description: VIN Buzzer Incoming
+          - name: C5_Yellow
+            description: Door Opener Activation
+
+      intercom:
+        description: ELVOX 1350 Intercom TERMINAL
+        pins:
+          - name: T1
+            description: Audio Headset
+          - name: T2
+            description: Audio Headset
+          - name: T3
+            description: Ground
+          - name: T4_5
+            description: Ground (via T3), Buzzer Ground Pin
+          - name: T6
+            description: Buzzer VIN Pin
+          - name: T7
+            description: Door Opener Switch, OnSwitch -> T4_5
+          - name: T8
+            description: Door Light Switch, nc, OnSwitch -> T4_5
+          - name: T1R
+            description: intercom_Cable.C1_Grey
+            side: right
+          - name: T2R
+            description: intercom_cable.C2_Brown
+            side: right
+          - name: T3R
+            description: intercom_cable.C3_Green
+            side: right
+          - name: T4_5R
+            description:
+            side: right
+          - name: T6R
+            description: "New: NC, Old: intercom_cable.C4_Pink"
+            side: right
+          - name: T7R
+            description: intercom_cable.C5_Yellow
+            side: right
+          - name: T8R
+            description:
+            side: right
+
+      relais_1channel:
+        description: "1 Channel Relais - Load: 10A 30VDC, Trigger: 3mA @ 3.3V"
+        pins:
+          - name: VCC
+          - name: GND
+          - name: IN
+          - name: NC
+            side: right
+          - name: COM
+            side: right
+          - name: "NO"
+            side: right
+
+      optocoupler_pc817:
+        description: "Optocoupler - PC817 Based, Input: 3-24V"
+        pins:
+          - name: VCC
+          - name: GND
+          - name: OUT
+          - name: SIG_PLUS
+            side: right
+          - name: SIG_MINUS
+            side: right
+
+      bme280:
+        description: BME280 Temperature / Humidity / Pressure Sensor
+        pins:
+          - name: VIN
+          - name: GND
+          - name: SCL
+          - name: SDA
+
+      adafruit_feather_esp32_v2:
+        description: Adafruit ESP32 Feather V2
+        pins:
+          - name: RST
+          - name: 3V3
+          - name: NC_L3
+          - name: GND
+          - name: GPIO26
+          - name: GPIO25
+          - name: GPIO34
+          - name: GPIO39
+          - name: GPIO36
+          - name: GPIO4
+          - name: GPIO5
+          - name: GPIO19
+          - name: GPIO21
+          - name: GPIO7
+          - name: GPIO8
+          - name: GPIO37
+          - name: NC_R1
+            side: right
+          - name: NC_R2
+            side: right
+          - name: NC_R3
+            side: right
+          - name: NC_R4
+            side: right
+          - name: VBAT
+            side: right
+          - name: EN
+            side: right
+          - name: USB
+            side: right
+          - name: GPIO13
+            side: right
+          - name: GPIO12
+            side: right
+          - name: GPIO27
+            side: right
+          - name: GPIO33
+            side: right
+          - name: GPIO15
+            side: right
+          - name: GPIO32
+            side: right
+          - name: GPIO14
+            side: right
+          - name: GPIO20
+            side: right
+          - name: GPIO22
+            side: right
+
+esphome:
+  name: ${esphome_name}
+  friendly_name: "${esphome_friendly_name} v${project_version}"
+  project:
+    name: wuxxin.esphome_intercom
+    version: ${project_version}
+  platformio_options:
+    # platform: espressif32@6.12.0
+    # https://docs.platformio.org/en/latest/projectconf/sections/env/index.html
+    build_flags: []
+    # - "-DMBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION"
+  libraries: []
+  # - https://github.com/espressif/esp-csi.git
+  includes: []
+  # build_path: ${build_path}
+
+esp32:
+  board: ${esp32_board}
+  framework:
+    type: esp-idf
+    # platform_version: # "5.3.1" # "5.5.1"
+    sdkconfig_options: {}
+      # https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/kconfig-reference.html
+      # CONFIG_MBEDTLS_DEBUG: y
+
+globals:
+  - id: morse_buffer
+    type: std::string
+    restore_value: no
+    initial_value: '""'
+  - id: press_start_time
+    type: unsigned long
+    restore_value: no
+    initial_value: "0"
+  - id: last_release_time
+    type: unsigned long
+    restore_value: no
+    initial_value: "0"
+
+wifi:
+  ssid: ${wifi_ssid}
+  password: ${wifi_password}
+  domain: ${domain}
+  use_address: ${connect_to}
+  # fast_connect: If enabled, directly connects to WiFi network without doing a full scan first.
+  # This is required for hidden networks and can significantly improve connection times.
+  fast_connect: true
+
+# Over-the-Air Updates
+ota:
+  - platform: esphome
+    password: ${ota_password}
+
+time:
+  - platform: sntp
+    id: time_sntp
+    timezone: "${time_timezone}"
+    on_time_sync:
+      - component.update: sensor_boot_timestamp
+
+mqtt:
+  broker: ${mqtt_broker}
+  port: 8883
+  username: ${mqtt_username}
+  password: ${mqtt_password}
+  # client_certificate
+  # client_certificate_key
+  certificate_authority: |
+    ${certificate_authority}
+
+  skip_cert_cn_check: true
+  # homeassistant: discover device and entities
+  discover_ip: True
+  discovery: true
+  discovery_unique_id_generator: mac
+
+  topic_prefix: esphome/${esphome_name}
+
+  # XXX debugging: comment section "log_topic" to disable debug messages
+  log_topic:
+    topic: esphome/${esphome_name}/debug
+    qos: 0
+    retain: true
+
+# XX debugging: comment section "web_server" and "logger" to disable debug messages
+web_server:
+  port: 80
+logger:
+  level: DEBUG
+
+# I2C-Bus, currently for the BME280 Sensor
+i2c:
+  sda: GPIO22 # Pin SDA/22 Feather V2
+  scl: GPIO20 # Pin SCL/20 Feather V2
+  scan: true
+  id: i2c_bus
+
+text_sensor:
+  - platform: template
+    id: detected_morse_code
+    name: "Erkannter Morsecode"
+    icon: "mdi:alpha"
+
+# Switches
+switch:
+  - platform: gpio
+    id: switch_door_opener
+    name: "Türöffner"
+    icon: mdi:gate
+    pin: GPIO13 # safe Pin, controls Onboard-LED for visual feedback
+    on_turn_on:
+      - delay: 5s
+      - switch.turn_off: switch_door_opener
+
+  - platform: gpio
+    id: switch_silence_buzzer
+    name: "Klingel Stummschaltung"
+    icon: mdi:volume-vibrate
+    pin: GPIO27 # universall GPIO without boot function
+
+  - platform: restart
+    id: switch_device_restart
+    name: "Gerät Neustart"
+
+# Sensors
+binary_sensor:
+  # Optocoupler: recognizes if buzzer would ring
+  - platform: gpio
+    id: bell_ringing
+    name: "Klingel läutet"
+    icon: mdi:bell-ring-outline
+    device_class: sound
+    pin:
+      number: GPIO33 # universal GPIO
+      inverted: true
+    filters:
+      - delayed_on: 20ms
+    on_press:
+      - then:
+          - script.stop: morse_publish_script
+          - lambda: |-
+              unsigned long now = millis();
+              if (id(last_release_time) > 0) {
+                unsigned long pause_duration = now - id(last_release_time);
+                if (pause_duration >= ${letter_timeout}) {
+                  id(morse_buffer) += " ";
+                }
+              }
+              id(press_start_time) = now;
+    on_release:
+      - then:
+          - lambda: |-
+              unsigned long press_duration = millis() - id(press_start_time);
+              if (press_duration < ${dot_dash_threshold}) {
+                id(morse_buffer) += ".";
+              } else {
+                id(morse_buffer) += "-";
+              }
+              id(last_release_time) = millis();
+              ESP_LOGD("morse", "Current buffer: %s", id(morse_buffer).c_str());
+          - script.execute: morse_publish_script
+
+sensor:
+  # BME280: Air- Temperature, Pressure and Moisture
+  - platform: bme280_i2c
+    temperature:
+      id: air_temperature
+      name: "Lufttemperatur"
+      filters:
+        - offset: ${temperature_offset}
+    pressure:
+      id: air_pressure
+      name: "Luftdruck"
+    humidity:
+      id: air_moisture
+      name: "Luftfeuchtigkeit"
+    address: 0x76 # https://esphome.io/components/sensor/bme280/
+    update_interval: 60s
+
+  - platform: wifi_signal
+    id: wifi_signal_db
+    name: "WiFi Signal dB"
+    icon: "mdi:wifi"
+    device_class: "signal_strength"
+    entity_category: "diagnostic"
+    update_interval: 60s
+
+  - platform: uptime
+    id: sensor_uptime
+    name: Uptime Sensor
+    internal: true
+
+  - platform: template
+    id: sensor_boot_timestamp
+    name: "Boot Timestamp"
+    icon: mdi:clock-start
+    device_class: "timestamp"
+    entity_category: "diagnostic"
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      static float timestamp = (
+        id(time_sntp).utcnow().timestamp - id(sensor_uptime).state
+      );
+      return timestamp;
+
+script:
+  - id: morse_publish_script
+    mode: restart
+    then:
+      - delay: ${sequence_timeout}ms
+      - lambda: |-
+          if (!id(morse_buffer).empty()) {
+            ESP_LOGD("morse", "Sequence finished. Publishing: %s", id(morse_buffer).c_str());
+            id(detected_morse_code).publish_state(id(morse_buffer));
+            id(morse_buffer) = "";
+            id(last_release_time) = 0;
+          }
