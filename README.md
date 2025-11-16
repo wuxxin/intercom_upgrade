@@ -55,6 +55,9 @@ Together with the List of all Connections as List:
 
 ![Wiring List for the intercom adapter](assets/intercom-upgrade-wiring-list.png)
 
+
+There is a [wiring_diagram.pdf](assets/wiring_diagram.pdf) available. If printed double-sided (short edge), it creates a fitting inlay for a typical junction box, allowing anyone who accesses the box to easily understand the wiring.
+
 ## Intercom Model (Elvox 1350)
 
 These photos show the specific intercom model (Art. 1350) and its terminal block. **Your terminals and wire colors will likely be different.** Use a multimeter to identify the correct pins for Ground, Bell/Buzzer signal, and Door Open activation on your own system.
@@ -75,17 +78,13 @@ The components were wired according to the diagram and fitted into a small proje
 | :---: | :---: |
 | ![All components laid out before assembly](assets/intercom-upgrade-unassembled.png) | ![Components assembled inside the project box](assets/intercom-upgrade-assembled.png) |
 
-There is a [wiring_diagram.pdf](assets/wiring_diagram.pdf) available. If printed double-sided (short edge), it creates a fitting inlay for a typical junction box, allowing anyone who accesses the box to easily understand the wiring.
-
----
-
 ## Software and Integration
 
-This project is designed to be used with ESPHome.
+This project is designed to be used with [ESPHome](https://esphome.io/).
 
 ### Configuration
 
-All software configuration is handled in the `intercom.yaml` file. Before building, you must provide your local credentials in the `substitutions` section at the top of the file. This includes:
+All software configuration is handled in the [intercom.yaml](intercom.yaml) file. Before building, you must provide your local credentials in the `substitutions` section at the top of the file. This includes:
 
 *   `wifi_ssid`: Your Wi-Fi network name.
 *   `wifi_password`: Your Wi--Fi password.
@@ -114,12 +113,6 @@ You can build and install the firmware using the ESPHome dashboard (a Home Assis
 1.  **Initial Install:** Connect the ESP32 board to your computer via USB. Use the ESPHome "Install" command and select the "USB" option to flash the initial firmware.
 2.  **Wireless Updates (OTA):** Once the device is running and connected to your network, you can send all subsequent updates wirelessly. Simply use the "Install" command again, but select the wireless option.
 
-### Wiring Diagram Generation
-
-This project includes a vibecoded Python script, `create_intercom_wiring.py`, that generates a detailed two page `wiring_diagram.pdf` file.
-
-The script parses the `substitutions:hardware` section within `intercom.yaml`, which defines all components, modules, and their connections. This creates an exact representation of the wiring defined in your YAML file. To generate the diagram if you modified `intercom.yaml`, simply run the Python script.
-
 ### MQTT
 
 The device connects to an MQTT broker and makes the following entities available:
@@ -133,6 +126,12 @@ The device connects to an MQTT broker and makes the following entities available
 ### Home Assistant
 
 If you are running Home Assistant with the MQTT integration, the device and its entities should be discovered automatically once it connects to your MQTT broker.
+
+### Wiring Diagram Regeneration
+
+This project includes a vibecoded Python Notebook and Script, [create_intercom_wiring.ipynb](create_intercom_wiring.ipynb), that generates the detailed two page [wiring_diagram.pdf](assets/wiring_diagram.pdf) file.
+
+The script parses the optional `substitutions:hardware` section within [intercom.yaml](intercom.yaml), which defines all components, modules and their connections, to create an representation of the wiring. To regenerate the diagram if you modified [intercom.yaml](intercom.yaml), run the Python Notebook.
 
 ## Bonus: Morse Code Detection
 
