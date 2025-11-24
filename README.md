@@ -8,10 +8,11 @@ Upgrades an existing apartment intercom system with additional functionality. Wa
 * 🔕 **Buzzer Silence:** A switch to silence the intercom's physical buzzer
 * 🚪 **Door Opener:** A switch to remotely activate the door opener
 * 🌡️ **Environment Sensing:** An unrelated optional BME280 sensor provides local temperature, humidity, and pressure readings
+* 📢 **Audio Output:** Play predefined sound effects (e.g., doorbell chimes, alerts) via a connected I2S speaker.
 
 ### Missing Features
 
-* 🎤 **Remote Microphone and Speaker:** Act as a remote microphone and speaker for Home Assistant.
+* 🎤 **Remote Microphone:** Act as a remote microphone for Home Assistant.
 
 Maybe another time.
 
@@ -33,12 +34,14 @@ The firmware build is lightweight (approx. 960kB flash, 36kB RAM), so nearly any
 | 1 | ESP32 Dev Board | ESP32 Feather V2 or ESP32 WROOM 32 Dev Kit | € 12.00 |
 | 2 | 1-Channel Relay Module | 1 Channel Relay Module 3.3V | € 5.00 (for 2) |
 | 1 | Optocoupler Module | PC817 Optocoupler Module | € 2.00 |
+| 1 | MAX98357A Amplifier | I2S 3W Class D Amplifier MAX98357A | € 4.00 |
+| 1 | Speaker | 4 Ohm or 8 Ohm Speaker 3W | € 3.00 |
 | 1 | Project Enclosure | Junction Box IP65 (small) | € 5.00 |
-| | **Sum** | | **€ 24.00** |
+| | **Sum** | | **€ 31.00** |
 | 1 | I2C Sensor | (optional) BME280 Sensor I2C | € 3.00 |
 | 1 | Power Cable | USB-Cable | € 2.50 |
 | 1 | Power Supply | `USB-Power Adapter` | € 5.00 |
-| | **Total** | | **€ 34.50** |
+| | **Total** | | **€ 41.50** |
 
 ## Wiring and Assembly
 
@@ -93,6 +96,18 @@ All software configuration is handled in the [intercom.yaml](intercom.yaml) file
 *   `mqtt_password`: Your MQTT password.
 *   `ota_password`: A password for securing wireless updates.
 
+### Audio Clips / Sounds
+
+To use the audio output feature, you need to provide sound files:
+
+1.  Place your sound files (e.g., `.wav`, `.mp3` supported by `sox`) in a `sounds/` directory.
+2.  The provided `Makefile` and `convert-sounds.sh` script will convert these files into a C++ header (`sounds.h`) that is included in the firmware.
+3.  **Note:** You need `sox` installed on your machine for the conversion script to work.
+    ```bash
+    make
+    ```
+4.  This generates `sounds.h`.
+
 ### Build and Install
 
 You can build and install the firmware using the ESPHome dashboard (a Home Assistant add-on) or the ESPHome command-line tool.
@@ -122,6 +137,13 @@ The device connects to an MQTT broker and makes the following entities available
 * 🔕 **Switch:** Buzzer silence toggle `switch_silence_buzzer`
 * 🌡️ **Sensors (BME280):** Temperature, Humidity, Pressure (`air_temperature`, `air_pressure`, `air_moisture`)
 * 📜 **Text Sensor:** Detects and displays Morse code patterns from the doorbell `detected_morse_code`
+
+#### Playing Sounds via MQTT
+
+To play a sound, send the sound name (the filename without extension, e.g., `ding_dong` for `ding_dong.mp3`) to the following topic:
+
+Topic: `esphome/intercom/play_sound`
+Payload: `ding_dong`
 
 ### Home Assistant
 

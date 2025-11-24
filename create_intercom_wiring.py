@@ -10,22 +10,7 @@ This script parses an ESPHome YAML configuration file, extracts explicit and imp
 
 It can be run as a standalone script (saving 'wiring_diagram.svg') or within a Jupyter/IPython notebook (displaying the SVG directly).
 
-## Install python packages
 """
-
-!pip install svgwrite weasyprint markdown cairosvg
-
-"""## Install librsvg2-bin if rsvg-convert is not found
-
-"""
-
-import shutil
-if shutil.which("rsvg-convert") is None:
-    !apt-get update && apt-get install -y librsvg2-bin
-
-"""## import libraries"""
-
-#!/usr/bin/env python
 
 import yaml
 import sys
@@ -571,6 +556,7 @@ class WiringDiagram:
         layout_grid = [
             ['esp32'],
             ['switch_door_opener', 'bell_ringing', 'switch_silence_buzzer', 'bme280_i2c_0x76'],
+            ['max98357a', 'speaker'],
             ['Intercom',],
             ['Intercom_Cable'],
         ]
