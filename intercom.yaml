@@ -50,12 +50,38 @@ substitutions:
         type: intercom
       - name: Intercom_Cable
         type: intercom_cable
+      - name: max98357a
+        type: max98357a
+      - name: speaker
+        type: speaker
     wiring:
       esp32.3V3:
         connect: rail_3V3.BUS
         color: red
       esp32.GND:
         connect: rail_GND.BUS
+        color: black
+
+      max98357a.VIN:
+        connect: rail_3V3.BUS
+        color: red
+      max98357a.GND:
+        connect: rail_GND.BUS
+        color: black
+      max98357a.LRC:
+        connect: esp32.GPIO25
+        color: orange
+      max98357a.BCLK:
+        connect: esp32.GPIO26
+        color: yellow
+      max98357a.DIN:
+        connect: esp32.GPIO4
+        color: green
+      max98357a.OUT_PLUS:
+        connect: speaker.PLUS
+        color: red
+      max98357a.OUT_MINUS:
+        connect: speaker.MINUS
         color: black
 
       switch_door_opener.VCC:
@@ -183,6 +209,31 @@ substitutions:
             description:
             side: right
 
+      max98357a:
+        description: "I2S 3W Class D Amplifier - MAX98357A"
+        pins:
+          - name: LRC
+          - name: BCLK
+          - name: DIN
+          - name: GAIN
+          - name: SD
+          - name: GND
+          - name: VIN
+          - name: OUT_PLUS
+            side: right
+            description: "To Speaker +"
+          - name: OUT_MINUS
+            side: right
+            description: "To Speaker -"
+
+      speaker:
+        description: "LuluDa Speaker 3W 8 Ohm"
+        pins:
+          - name: PLUS
+            description: "+"
+          - name: MINUS
+            description: "-"
+
       relais_1channel:
         description: "1 Channel Relais - Load: 10A 30VDC, Trigger: 3mA @ 3.3V"
         pins:
@@ -280,7 +331,8 @@ esphome:
     # - "-DMBEDTLS_X509_ALLOW_UNSUPPORTED_CRITICAL_EXTENSION"
   libraries: []
   # - https://github.com/espressif/esp-csi.git
-  includes: []
+  includes:
+    - sounds.h
   # build_path: ${build_path}
 
 esp32:
@@ -351,6 +403,18 @@ mqtt:
     qos: 0
     retain: true
 
+  on_message:
+    - topic: esphome/${esphome_name}/play_sound
+      then:
+        - lambda: |-
+            auto *sound = get_sound(x);
+            if (sound != nullptr) {
+              id(intercom_speaker).play(sound->data(), sound->size());
+              ESP_LOGD("custom", "Playing sound: %s", x.c_str());
+            } else {
+              ESP_LOGW("custom", "Sound not found: %s", x.c_str());
+            }
+
 # XX debugging: comment section "web_server" and "logger" to disable debug messages
 web_server:
   port: 80
@@ -363,6 +427,17 @@ i2c:
   scl: GPIO20 # Pin SCL/20 Feather V2
   scan: true
   id: i2c_bus
+
+i2s_audio:
+  i2s_lrclk_pin: GPIO25
+  i2s_bclk_pin: GPIO26
+
+speaker:
+  - platform: i2s_audio
+    id: intercom_speaker
+    dac_type: external
+    i2s_dout_pin: GPIO4
+    mode: mono
 
 text_sensor:
   - platform: template
