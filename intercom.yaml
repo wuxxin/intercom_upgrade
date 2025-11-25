@@ -4,7 +4,7 @@ substitutions:
   # for override
   esp32_board: adafruit_feather_esp32_v2
   esphome_name: "intercom"
-  project_version: "0.1.0"
+  project_version: "0.2.0"
   esphome_friendly_name: "Gegensprechanlage"
   time_timezone: "Europe/Vienna"
   temperature_offset: "-2.0" # Adjust BME280-temperature: e.g. "0.0", "-1.5", "2.1"
@@ -12,11 +12,11 @@ substitutions:
   # connect_to: optional, custom dns name to reach for updating running esp
   connect_to: ""
   # mandatory parameter to be set
-  wifi_ssid: ""
-  wifi_password: ""
-  mqtt_broker: ""
-  mqtt_username: ""
-  mqtt_password: ""
+  wifi_ssid: "testssid"
+  wifi_password: "testpassword"
+  mqtt_broker: "mqttserver.local"
+  mqtt_username: "mqttuser"
+  mqtt_password: "mqttpassword"
   ota_password: ""
   certificate_authority: |
     -----BEGIN CERTIFICATE-----
@@ -210,7 +210,7 @@ substitutions:
             side: right
 
       max98357a:
-        description: "I2S 3W Class D Amplifier - MAX98357A"
+        description: "Amplifier - I2S 3W Class D - MAX98357A"
         pins:
           - name: LRC
           - name: BCLK
@@ -227,7 +227,7 @@ substitutions:
             description: "To Speaker -"
 
       speaker:
-        description: "LuluDa Speaker 3W 8 Ohm"
+        description: "Speaker - 3W 8 Ohm"
         pins:
           - name: PLUS
             description: "+"
@@ -437,7 +437,7 @@ speaker:
     id: intercom_speaker
     dac_type: external
     i2s_dout_pin: GPIO4
-    mode: mono
+    channel: mono
 
 text_sensor:
   - platform: template

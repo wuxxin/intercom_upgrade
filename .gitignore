@@ -1,2 +1,15 @@
 # Gitignore settings for ESPHome
 /.esphome/
+
+# editor artifacts
+.zed
+
+# python artifacts
+*.pyc
+__pycache__
+.ipynb_checkpoints
+.venv
+/intercom_upgrade.egg-info/
+
+# currently we dont want uv.lock in the repo
+uv.lock

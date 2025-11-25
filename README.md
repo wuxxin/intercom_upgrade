@@ -4,7 +4,7 @@ Upgrades an existing apartment intercom system with additional functionality. Wa
 
 ## Features
 
-* 🔔 **Ring Detection:** Detects when the intercom bell is ringing
+* 🔘 **Ring Button Detection:** Detects when the intercom bell is ringing
 * 🔕 **Buzzer Silence:** A switch to silence the intercom's physical buzzer
 * 🚪 **Door Opener:** A switch to remotely activate the door opener
 * 🌡️ **Environment Sensing:** An unrelated optional BME280 sensor provides local temperature, humidity, and pressure readings
@@ -12,7 +12,7 @@ Upgrades an existing apartment intercom system with additional functionality. Wa
 
 ### Missing Features
 
-* 🎤 **Remote Microphone and Speaker:** Act as a remote microphone and speaker for Home Assistant.
+* 🎤🔊 **Remote Microphone and Speaker:** Act as a remote microphone and speaker for Home Assistant.
 
 Maybe another time.
 
@@ -37,11 +37,11 @@ The firmware build is lightweight (approx. 960kB flash, 36kB RAM), so nearly any
 | 1 | Project Enclosure | Junction Box IP65 (small) | € 5.00 |
 | | **Sum** | | **€ 24.00** |
 | 1 | I2C Sensor | (optional) BME280 Sensor I2C | € 3.00 |
-| 1 | MAX98357A Amplifier | (optional) I2S 3W Class D Amplifier MAX98357A | € 4.00 |
-| 1 | Speaker | (optional) 4 Ohm or 8 Ohm Speaker 3W | € 3.00 |
+| 1 | MAX98357A Amplifier | (optional) I2S 3W Class D Amplifier MAX98357A | € 3.00 |
+| 1 | Speaker | (optional) 4 Ohm or 8 Ohm Speaker 3W | € 2.00 |
 | 1 | Power Cable | USB-Cable | € 2.50 |
 | 1 | Power Supply | `USB-Power Adapter` | € 5.00 |
-| | **Total** | | **€ 41.50** |
+| | **Total** | | **€ 39.50** |
 
 ## Wiring and Assembly
 
